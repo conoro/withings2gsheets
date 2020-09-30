@@ -1,0 +1,20 @@
+{
+  "name": "withings2gsheets",
+  "version": "1.0.0",
+  "description": "Saving Withings scales data to GSheets and CSV/LevelDB in Node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Conor O'Neill",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "axios": "^0.20.0",
+    "dayjs": "^1.8.35",
+    "express": "^4.17.1",
+    "form-data": "^3.0.0",
+    "google-spreadsheet": "^3.0.13",
+    "level": "^6.0.1",
+    "open": "^7.2.0"
+  }
+}
