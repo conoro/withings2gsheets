@@ -51,6 +51,7 @@ It's as simple as:
 node index.js
 ```
 
+* The first time you run it, your browser will open and you'll have to login to Withings and provide permission for the app to access your scales data. 
 * The code logs what it is doing to the screen. 
 * If all has worked ok, your Google Sheet will now have all of your Withings data. 
 * If you have a lot of historical data, it will take quite a while. 
@@ -61,4 +62,5 @@ node index.js
 ## Dealing with problems
 * If anything ever goes wrong and some data is not saved to CSV, Google Sheets or LevelDB, just delete the withingsprevioustime.json file in the .withings2gsheets sub-directory of your output directory. This will cause the code to check all entries back to the start of your Withings history and save any that are missing locally. 
 * If you want to just grab data from Withings from a particular time onwards, save that time as [Unix Epoch in seconds](https://www.epochconverter.com/) to withingsprevioustime.json and then run the code
+* If you ever run into authorization issues with Withings, just delete the withings2gsheetstokens.json file in the .withings2gsheets sub-directory of your output directory and re-run the code. It'll re-do the authorization flow in your browser.
 
