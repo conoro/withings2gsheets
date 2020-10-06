@@ -2,15 +2,16 @@ var config = require('./config');
 const FormData = require('form-data');
 const fs = require("fs");
 const axios = require('axios');
-var level = require("level");
+const sqlite3 = require('sqlite3').verbose();
 let conor = require('./conor.js');
 
-
-// This is the LevelDB directory
-var db = level(config.leveldb_output_path, {
-    valueEncoding: "json"
+// Replaced LevelDB with SQLite due to clash with Dropbox syncing
+let db = new sqlite3.Database(config.sqlite3_output_path, (err) => {
+    if (err) {
+        console.error(err.message);
+    }
+    console.log('Connected to sqlite3.');
 });
-
 
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 
@@ -226,77 +227,94 @@ async function writeGSheets(mergedData) {
     console.log("Finished GSheets updates");
 }
 
-// Write metrics to LevelDB, CSV and Google Sheets
+// Write metrics to SQLite, CSV and Google Sheets
 async function persistData(mergedData) {
 
     console.log("Persisting data from Withings API");
 
-    for (var i = 0, len = mergedData.length; i < len; i++) {
-        // Save in LevelDB. Don't need to worry about repeated entries. Automatically handles incremental updates too
-        // TODO: Probably need to fix what's being saved there, date is repeated.
-        // TODO: Also need to make all the metrics configurable based on config.js at some point
+    // db.serialize runs sqlite operations in serial order
+    db.serialize(() => {
+        db.run('CREATE TABLE IF NOT EXISTS measurements( date INTEGER PRIMARY KEY, Weight REAL, FatFreeMass REAL, FatRatio REAL, FatMassWeight REAL, HeartPulse INTEGER, MuscleMass REAL, Hydration REAL, BoneMass REAL, PulseWaveVelocity REAL, UNIQUE(date))', (err) => {
+            if (err) {
+                console.log(err);
+                throw err;
+            }
+        });
 
-        if (mergedData[i]["Weight"] === undefined) {
-            mergedData[i]["Weight"] = " ";
-        } else {
-            mergedData[i]["Weight"] = mergedData[i]["Weight"] / 1000;
+        for (var i = 0, len = mergedData.length; i < len; i++) {
+            // Save in SQLite3.
+            // TODO: Need to make all the metrics configurable based on config.js at some point
+
+            if (mergedData[i]["Weight"] === undefined) {
+                mergedData[i]["Weight"] = " ";
+            } else {
+                mergedData[i]["Weight"] = mergedData[i]["Weight"] / 1000;
+            }
+
+            if (mergedData[i]["Fat Free Mass"] === undefined) {
+                mergedData[i]["Fat Free Mass"] = " ";
+            } else {
+                mergedData[i]["Fat Free Mass"] = mergedData[i]["Fat Free Mass"] / 1000;
+            }
+
+            if (mergedData[i]["Fat Ratio"] === undefined) {
+                mergedData[i]["Fat Ratio"] = " ";
+            } else {
+                mergedData[i]["Fat Ratio"] = mergedData[i]["Fat Ratio"] / 1000;
+            }
+
+            if (mergedData[i]["Fat Mass Weight"] === undefined) {
+                mergedData[i]["Fat Mass Weight"] = " ";
+            } else {
+                mergedData[i]["Fat Mass Weight"] = mergedData[i]["Fat Mass Weight"] / 100;
+            }
+
+            if (mergedData[i]["Heart Pulse"] === undefined) mergedData[i]["Heart Pulse"] = " ";
+
+            if (mergedData[i]["Muscle Mass"] === undefined) {
+                mergedData[i]["Muscle Mass"] = " ";
+            } else {
+                mergedData[i]["Muscle Mass"] = mergedData[i]["Muscle Mass"] / 100;
+            }
+
+            if (mergedData[i]["Hydration"] === undefined) {
+                mergedData[i]["Hydration"] = " ";
+            } else {
+                mergedData[i]["Hydration"] = mergedData[i]["Hydration"] / 100;
+            }
+
+            if (mergedData[i]["Bone Mass"] === undefined) {
+                mergedData[i]["Bone Mass"] = " ";
+            } else {
+                mergedData[i]["Bone Mass"] = mergedData[i]["Bone Mass"] / 100;
+            }
+
+            if (mergedData[i]["Pulse Wave Velocity"] === undefined) {
+                mergedData[i]["Pulse Wave Velocity"] = " ";
+            } else {
+                mergedData[i]["Pulse Wave Velocity"] = mergedData[i]["Pulse Wave Velocity"] / 1000;
+            }
+
+            // Insert row to SQLite DB if it doesn't already exist
+            db.run(`INSERT OR IGNORE INTO measurements(date, Weight, FatFreeMass, FatRatio, FatMassWeight, HeartPulse, MuscleMass, Hydration, BoneMass, PulseWaveVelocity)
+              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, mergedData[i].date, mergedData[i]["Weight"], mergedData[i]["Fat Free Mass"], mergedData[i]["Fat Ratio"], mergedData[i]["Fat Mass Weight"], mergedData[i]["Heart Pulse"], mergedData[i]["Muscle Mass"], mergedData[i]["Hydration"], mergedData[i]["Bone Mass"], mergedData[i]["Pulse Wave Velocity"], (err) => {
+                if (err) {
+                    console.log(err);
+                    throw err;
+                }
+            });
         }
+    });
 
-        if (mergedData[i]["Fat Free Mass"] === undefined) {
-            mergedData[i]["Fat Free Mass"] = " ";
-        } else {
-            mergedData[i]["Fat Free Mass"] = mergedData[i]["Fat Free Mass"] / 1000;
+    // Close the connection with database
+    await db.close((err) => {
+        if (err) {
+            console.error(err.message);
         }
+        // console.log('Closed the SQLite connection.');
+    });
 
-        if (mergedData[i]["Fat Ratio"] === undefined) {
-            mergedData[i]["Fat Ratio"] = " ";
-        } else {
-            mergedData[i]["Fat Ratio"] = mergedData[i]["Fat Ratio"] / 1000;
-        }
-
-        if (mergedData[i]["Fat Mass Weight"] === undefined) {
-            mergedData[i]["Fat Mass Weight"] = " ";
-        } else {
-            mergedData[i]["Fat Mass Weight"] = mergedData[i]["Fat Mass Weight"] / 100;
-        }
-
-        if (mergedData[i]["Heart Pulse"] === undefined) mergedData[i]["Heart Pulse"] = " ";
-
-        if (mergedData[i]["Muscle Mass"] === undefined) {
-            mergedData[i]["Muscle Mass"] = " ";
-        } else {
-            mergedData[i]["Muscle Mass"] = mergedData[i]["Muscle Mass"] / 100;
-        }
-
-        if (mergedData[i]["Hydration"] === undefined) {
-            mergedData[i]["Hydration"] = " ";
-        } else {
-            mergedData[i]["Hydration"] = mergedData[i]["Hydration"] / 100;
-        }
-
-        if (mergedData[i]["Bone Mass"] === undefined) {
-            mergedData[i]["Bone Mass"] = " ";
-        } else {
-            mergedData[i]["Bone Mass"] = mergedData[i]["Bone Mass"] / 100;
-        }
-
-        if (mergedData[i]["Pulse Wave Velocity"] === undefined) {
-            mergedData[i]["Pulse Wave Velocity"] = " ";
-        } else {
-            mergedData[i]["Pulse Wave Velocity"] = mergedData[i]["Pulse Wave Velocity"] / 1000;
-        }
-
-        // Save to LevelDB. It automatically avoids duplication of rows
-        try {
-            await db.put(
-                mergedData[i].date,
-                mergedData[i])
-        } catch (error) {
-            console.log("Error writing to LevelDB!", error);
-        }
-    }
-
-    console.log("LevelDB updated");
+    console.log("SQLite updated");
 
     // Modify Dates to be human readable and Excel/GSheets parsable
     // Settled on YYYY-MM-DD HH:mm:ss everywhere except Conor's old GSHeets annual tabs
@@ -348,7 +366,7 @@ async function getWithingsData(accessToken, refreshToken, currentTime) {
             // Pull out the useful info and merge into human readable array of objects
             var mergedData = await processData(response.data.body);
 
-            // Write out to LevelDB, CSV and Google Sheets
+            // Write out to SQLite, CSV and Google Sheets
             await persistData(mergedData);
 
             // TODO: Move this call to the data saving function eventually so only updates timestamp if data successfully saved locally

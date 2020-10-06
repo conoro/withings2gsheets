@@ -4,7 +4,7 @@
  LICENSE: Apache-2.0
 
  This Node.js app downloads your data that was uploaded by a Withings weighing scales 
- to their Cloud API and saves it to CSV, LevelDB and Google Sheets.
+ to their Cloud API and saves it to CSV, SQLite and Google Sheets.
 
 */
 

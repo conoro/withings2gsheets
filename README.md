@@ -28,7 +28,7 @@ Copy config-sample.js to config.js and make the following initial changes:
 * Set config.gSheetsId to the part of the url after /d/ in the Google Sheet you want to save your data to
 * Set config.gSheetsTabId to the gid in the url for the Tab inside the Google Sheet you want to use
 * Set config.height to your height in metres.
-* Set config.data_dir to where you want all output files and authorization keys to be saved. I keep mine in a Dropbox folder so I can run the code on multiple machines. But it does show some LevelDB file lock errors on occasion.
+* Set config.data_dir to where you want all output files and authorization keys to be saved. I keep mine in a Dropbox folder so I can run the code on multiple machines.
 
 
 ## Withings API Setup
@@ -56,11 +56,11 @@ node index.js
 * If all has worked ok, your Google Sheet will now have all of your Withings data. 
 * If you have a lot of historical data, it will take quite a while. 
 * Once you do that the first time, it will only grab the latest data after that from the API and is very quick.
-* Data is also saved to a locak LevelDB database and to an Excel-compatible CSV file
+* Data is also saved to a local SQLite database and to an Excel-compatible CSV file
 
 
 ## Dealing with problems
-* If anything ever goes wrong and some data is not saved to CSV, Google Sheets or LevelDB, just delete the withingsprevioustime.json file in the .withings2gsheets sub-directory of your output directory. This will cause the code to check all entries back to the start of your Withings history and save any that are missing locally. 
+* If anything ever goes wrong and some data is not saved to CSV, Google Sheets or SQLite, just delete the withingsprevioustime.json file in the .withings2gsheets sub-directory of your output directory. This will cause the code to check all entries back to the start of your Withings history and save any that are missing locally. 
 * If you want to just grab data from Withings from a particular time onwards, save that time as [Unix Epoch in seconds](https://www.epochconverter.com/) to withingsprevioustime.json and then run the code
 * If you ever run into authorization issues with Withings, just delete the withings2gsheetstokens.json file in the .withings2gsheets sub-directory of your output directory and re-run the code. It'll re-do the authorization flow in your browser.
 
