@@ -28,8 +28,11 @@ config.gsheets_key_path = config.output_dir + "withings2gsheets-service-account.
 // This CSV outuput file is slightly unusual so that it loads correctly into Excel with just a double-click
 config.csv_output_path = config.data_dir + "withings_data.csv";
 
-// This LevelDB database is the "master" system of record. I never actually do anything with it tho. Just nice to have.
-config.leveldb_output_path = config.data_dir + "withings_data.db";
+// This SQLite database is the "master" system of record. 
+// I never actually do anything with it tho.
+// But if you install the sqlite3 CLI, you can run SQL queries on it.
+// Which is nice. (Fast Show)
+config.sqlite3_output_path = config.data_dir + "withings_data.sqlite3";
 
 
 config.metrics = {
