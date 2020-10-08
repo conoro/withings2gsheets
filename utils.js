@@ -234,7 +234,7 @@ async function persistData(mergedData) {
 
     // db.serialize runs sqlite operations in serial order
     db.serialize(() => {
-        db.run('CREATE TABLE IF NOT EXISTS measurements( date INTEGER PRIMARY KEY, Weight REAL, FatFreeMass REAL, FatRatio REAL, FatMassWeight REAL, HeartPulse INTEGER, MuscleMass REAL, Hydration REAL, BoneMass REAL, PulseWaveVelocity REAL, UNIQUE(date))', (err) => {
+        db.run('CREATE TABLE IF NOT EXISTS measurements( date INTEGER PRIMARY KEY, FormattedDate TEXT, Weight REAL, FatFreeMass REAL, FatRatio REAL, FatMassWeight REAL, HeartPulse INTEGER, MuscleMass REAL, Hydration REAL, BoneMass REAL, PulseWaveVelocity REAL, UNIQUE(date))', (err) => {
             if (err) {
                 console.log(err);
                 throw err;
@@ -244,6 +244,12 @@ async function persistData(mergedData) {
         for (var i = 0, len = mergedData.length; i < len; i++) {
             // Save in SQLite3.
             // TODO: Need to make all the metrics configurable based on config.js at some point
+
+            // Save Formatted Date in SQLite too for ease of use with Excel via ODBC
+            let d = new Date(mergedData[i].date * 1000);
+            let month = d.getMonth() + 1;
+            let formattedDate = d.getFullYear() + "-" + ("0" + month).slice(-2) + "-" + ("0" + d.getDate()).slice(-2) + " " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2);
+            mergedData[i]["Formatted Date"] = formattedDate;
 
             if (mergedData[i]["Weight"] === undefined) {
                 mergedData[i]["Weight"] = " ";
@@ -296,8 +302,8 @@ async function persistData(mergedData) {
             }
 
             // Insert row to SQLite DB if it doesn't already exist
-            db.run(`INSERT OR IGNORE INTO measurements(date, Weight, FatFreeMass, FatRatio, FatMassWeight, HeartPulse, MuscleMass, Hydration, BoneMass, PulseWaveVelocity)
-              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, mergedData[i].date, mergedData[i]["Weight"], mergedData[i]["Fat Free Mass"], mergedData[i]["Fat Ratio"], mergedData[i]["Fat Mass Weight"], mergedData[i]["Heart Pulse"], mergedData[i]["Muscle Mass"], mergedData[i]["Hydration"], mergedData[i]["Bone Mass"], mergedData[i]["Pulse Wave Velocity"], (err) => {
+            db.run(`INSERT OR IGNORE INTO measurements(date, FormattedDate, Weight, FatFreeMass, FatRatio, FatMassWeight, HeartPulse, MuscleMass, Hydration, BoneMass, PulseWaveVelocity)
+              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, mergedData[i].date, mergedData[i]["Formatted Date"], mergedData[i]["Weight"], mergedData[i]["Fat Free Mass"], mergedData[i]["Fat Ratio"], mergedData[i]["Fat Mass Weight"], mergedData[i]["Heart Pulse"], mergedData[i]["Muscle Mass"], mergedData[i]["Hydration"], mergedData[i]["Bone Mass"], mergedData[i]["Pulse Wave Velocity"], (err) => {
                 if (err) {
                     console.log(err);
                     throw err;

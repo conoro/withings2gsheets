@@ -57,6 +57,11 @@ node index.js
 * If you have a lot of historical data, it will take quite a while. 
 * Once you do that the first time, it will only grab the latest data after that from the API and is very quick.
 * Data is also saved to a local SQLite database and to an Excel-compatible CSV file
+* You can interact with the SQLite DB using [the sqlite3 CLI](https://sqlite.org/download.html) or interactively connect to it from Excel over ODBC using [this driver](http://www.ch-werner.de/sqliteodbc/) and a connection string like
+
+```
+Driver={SQLite3 ODBC Driver};F:\Dropbox\Running and Health\Withings Scales Data 2020 Onwards\withings_data.sqlite3;
+```
 
 
 ## Dealing with problems
