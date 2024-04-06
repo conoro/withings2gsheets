@@ -63,6 +63,13 @@ node index.js
 Driver={SQLite3 ODBC Driver};F:\Dropbox\Running and Health\Withings Scales Data 2020 Onwards\withings_data.sqlite3;
 ```
 
+## Using Bun instead of Node.js
+I particularly like the built-in support for SQLite in Bun and its overall performance. I could probably rewrite things to work with both Bun and Node.js but I don't have the time. So I've just included slightly modified files for anyone who wants to use Bun. Just do:
+
+```bash
+bun install
+bun index_bun.js
+```
 
 ## Dealing with problems
 * If anything ever goes wrong and some data is not saved to CSV, Google Sheets or SQLite, just delete the withingsprevioustime.json file in the .withings2gsheets sub-directory of your output directory. This will cause the code to check all entries back to the start of your Withings history and save any that are missing locally. 
