@@ -34,7 +34,7 @@ doEverything();
 async function doEverything() {
   // Main code block
   const app = express();
-  const server = app.listen(5000, '127.0.0.1', () => { });
+  const server = app.listen(5005, '127.0.0.1', () => { });
 
   let previousTimestamp = utils.getPreviousTimestamp();
   let currentTime = Math.round(Date.now() / 1000);
@@ -73,7 +73,7 @@ async function doEverything() {
     // and request token from scratch.
     let authURL = "https://account.withings.com/oauth2_user/authorize2?response_type=code&client_id=" +
       config.withingsClientID +
-      "&redirect_uri=http://localhost:5000/get_token&scope=user.info,user.metrics,user.activity&" +
+      "&redirect_uri=http://localhost:5005/get_token&scope=user.info,user.metrics,user.activity&" +
       "state=" +
       config.withingsState;
     opn(authURL, { wait: false });
@@ -94,7 +94,7 @@ async function doEverything() {
     bodyFormData.append('client_id', config.withingsClientID);
     bodyFormData.append('client_secret', config.withingsClientSecret);
     bodyFormData.append('code', requestToken);
-    bodyFormData.append('redirect_uri', 'http://localhost:5000/get_token');
+    bodyFormData.append('redirect_uri', 'http://localhost:5005/get_token');
 
     try {
       const response = await axios.post("https://wbsapi.withings.net/v2/oauth2", bodyFormData, { headers: bodyFormData.getHeaders() });
