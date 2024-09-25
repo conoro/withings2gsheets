@@ -19,7 +19,7 @@ async function updateCurrentAnnualTab(withingsRow, doc) {
 
     // Now using cell-based access as row-based functions trashed cells with formulae
     // Load 365 days worth of cells
-    await annualSheet.loadCells('A1:O367');
+    await annualSheet.loadCells('A1:S367');
 
     var d1 = dayjs(withingsRow.date, "YYYY-MM-DD HH:mm:ss");
     //console.log(withingsRow.date);
@@ -29,33 +29,33 @@ async function updateCurrentAnnualTab(withingsRow, doc) {
         // Historical date format is not great
         // console.log(annualSheet.getCell(j, 0).formattedValue);
         if (d1.isSame(dayjs(annualSheet.getCell(j, 0).formattedValue, "DD/MM/YYYY"), 'day')) {
-            weightKG = annualSheet.getCell(j, config.metricsConor["Weight KG"]).value;
+            var weightKG = annualSheet.getCell(j, config.metricsConor["Weight KG"]).value;
 
             if ((weightKG === undefined) || (weightKG === " ") || (weightKG === null)) {
                 console.log("New Conor Annual Tab Row: ", withingsRow.date, j, withingsRow.Weight);
                 // Column Matching
-                // Source Column B = Weight in KG >>> Target Column J
+                // Source Column B = Weight in KG >>> Target Column N
                 annualSheet.getCell(j, config.metricsConor["Weight KG"]).value = withingsRow.Weight;
 
-                // Calculate Weight in LBS >>> Target Column H
+                // Calculate Weight in LBS >>> Target Column L
                 var lbsString = (withingsRow.Weight / 0.45359237);
                 annualSheet.getCell(j, config.metricsConor["Weight lbs"]).value = lbsString;
 
-                // Calculate Weight in LBS/ST >>> Target Columm I
+                // Calculate Weight in LBS/ST >>> Target Columm M
                 var stlbsString = Math.floor(lbsString / 14) + "st " + (lbsString % 14).toFixed(2) + "lbs";
                 annualSheet.getCell(j, config.metricsConor["Weight"]).value = stlbsString;
 
-                // Source Column E = Fat Mass Weight >>> Target Column K
+                // Source Column E = Fat Mass Weight >>> Target Column O
                 annualSheet.getCell(j, config.metricsConor["Body Fat"]).value = withingsRow["Fat Mass Weight"];
 
-                // Source Column H = Hydration >>> Target Column L
+                // Source Column H = Hydration >>> Target Column P
                 annualSheet.getCell(j, config.metricsConor["Water"]).value = withingsRow["Hydration"];
 
-                // Calculate BMI (could alternatively pull height from API) >>> Target Column M
+                // Calculate BMI (could alternatively pull height from API) >>> Target Column Q
                 // BMI = weight (kg) / [height (m)]2
                 annualSheet.getCell(j, config.metricsConor["BMI"]).value = (withingsRow.Weight / (config.height * config.height));
 
-                // Source Column G = Muscle Mass >>> Target Column N 
+                // Source Column G = Muscle Mass >>> Target Column R 
                 annualSheet.getCell(j, config.metricsConor["Muscle"]).value = withingsRow["Muscle Mass"];
 
                 // Save to GSheets

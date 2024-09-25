@@ -152,7 +152,7 @@ async function writeCSV(mergedData) {
     }
 
     var splitLines = [];
-    for (i in dataLines) {
+    for (var i in dataLines) {
         splitLines.push(dataLines[i].split(','));
     }
 
@@ -162,7 +162,7 @@ async function writeCSV(mergedData) {
     for (var k = mergedData.length - 1; k >= 0; k--) {
         // console.log(mergedData[k]);
         var matched = 0;
-        for (j in splitLines) {
+        for (var j in splitLines) {
             if (mergedData[k]['date'] == splitLines[j][0]) {
                 matched = 1;
             }
