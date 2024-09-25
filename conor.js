@@ -19,7 +19,7 @@ async function updateCurrentAnnualTab(withingsRow, doc) {
 
     // Now using cell-based access as row-based functions trashed cells with formulae
     // Load 365 days worth of cells
-    await annualSheet.loadCells('A1:S367');
+    await annualSheet.loadCells('A1:ZS367');
 
     var d1 = dayjs(withingsRow.date, "YYYY-MM-DD HH:mm:ss");
     //console.log(withingsRow.date);
